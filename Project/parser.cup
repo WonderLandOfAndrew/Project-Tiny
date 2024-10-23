@@ -31,8 +31,12 @@ init with {:
 scan with {: return lexer.next_token(); :};
 
 /* Terminals (tokens returned by the scanner). */
-terminal SEMI, PLUS, MINUS, UMINUS, TIMES, DIVIDE, GREATER, LESS, 
-LPAREN, RPAREN;
+
+terminal SEMI, PLUS, MINUS, UMINUS, TIMES, DIVIDE, QCHAR;
+terminal LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK;
+terminal IF, ELSE, WHILE, RETURN, WRITE, READ, LENGTH;
+terminal GREATER, LESS, ASSIGN, EQUALEQUAL, NEQUAL, NOT;  // Add new terminals here
+
 terminal Integer    NUMBER;        // our scanner provides numbers as integers
 
 /* Non terminals */
@@ -43,6 +47,7 @@ non terminal Integer    expr;      // used to store evaluated subexpressions
 precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
 precedence left GREATER, LESS;
+precedence left EQUALEQUAL, NEQUAL;
 precedence left UMINUS;
 
 /* The grammar rules */
@@ -54,11 +59,9 @@ expr      ::= expr:e1 PLUS  expr:e2         {: RESULT = e1+e2;        :}
              | expr:e1 MINUS expr:e2        {: RESULT = e1-e2;        :}
              | expr:e1 TIMES expr:e2        {: RESULT = e1*e2;        :}
              | expr:e1 DIVIDE expr:e2       {: RESULT = e1/e2;        :}
-             | expr:e1 GREATER expr:e2        {: RESULT = (e1 > e2) ? 1 : 0;:}
-			 | expr:e1 LESS expr:e2     {: RESULT = (e1 > e2) ? 1 : 0; :}
              | MINUS expr:e                 {: RESULT = -e;           :}
              %prec UMINUS
-             | LPAREN expr:e RPAREN	         {: RESULT = e;           :}
-             | NUMBER:n	                     {: RESULT = n;           :}
+             | LPAR expr:e RPAR         	{: RESULT = e;            :}
+             | NUMBER:n                     {: RESULT = n;            :}
              ;
        

@@ -58,11 +58,14 @@ Newline    = \r | \n | \r\n
 Whitespace = [ \t\f] | {Newline}
 Number     = [0-9]+
 
+
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment}
 TraditionalComment = "/*" {CommentContent} \*+ "/"
 EndOfLineComment = "//" [^\r\n]* {Newline}
 CommentContent = ( [^*] | \*+[^*/] )*
+Quotes = \'
+QCHAR = {Quotes}[A-Za-z][a-zA-Z0-9_ ]*{Quotes}
 
 ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
 
@@ -79,15 +82,44 @@ ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
 
   {Whitespace} {                              }
   ";"          { return symbolFactory.newSymbol("SEMI", SEMI); }
+  
   "+"          { return symbolFactory.newSymbol("PLUS", PLUS); }
   "-"          { return symbolFactory.newSymbol("MINUS", MINUS); }
   "*"          { return symbolFactory.newSymbol("TIMES", TIMES); }
   "/"          { return symbolFactory.newSymbol("DIVIDE", DIVIDE); }
+  
+  "n"          { return symbolFactory.newSymbol("UMINUS", UMINUS); }
+  "("          { return symbolFactory.newSymbol("LPAR", LPAR); }
+  ")"          { return symbolFactory.newSymbol("RPAR", RPAR); }
+  
+  "{"          { return symbolFactory.newSymbol("LBRACE", LBRACE); }
+  "}"          { return symbolFactory.newSymbol("RBRACE", RBRACE); }
+  
+  "["          { return symbolFactory.newSymbol("LBRACK", LBRACK); }
+  "]"          { return symbolFactory.newSymbol("RBRACK", RBRACK); }
+  
+  "="          { return symbolFactory.newSymbol("ASSIGN", ASSIGN); }
+  "!"          { return symbolFactory.newSymbol("NOT", NOT); }
+  
+  "=="         { return symbolFactory.newSymbol("EQUALEQUAL", EQUALEQUAL); } 
+  "!="         { return symbolFactory.newSymbol("NEQUAL", NEQUAL); } 
   ">"          { return symbolFactory.newSymbol("GREATER", GREATER); }
   "<"          { return symbolFactory.newSymbol("LESS", LESS); }
-  "n"          { return symbolFactory.newSymbol("UMINUS", UMINUS); }
-  "("          { return symbolFactory.newSymbol("LPAREN", LPAREN); }
-  ")"          { return symbolFactory.newSymbol("RPAREN", RPAREN); }
+  
+  //"int"        { return symbolFactory.newSymbol("INT", sym.INT); }
+  //"char"       { return symbolFactory.newSymbol("CHAR", sym.CHAR); }
+  
+  "if"         { return symbolFactory.newSymbol("IF", sym.IF); }
+  "else"       { return symbolFactory.newSymbol("ELSE", sym.ELSE); }
+  "while"      { return symbolFactory.newSymbol("WHILE", sym.WHILE); }
+  "return"     { return symbolFactory.newSymbol("RETURN", sym.RETURN); }
+  "length"     { return symbolFactory.newSymbol("LENGTH", sym.LENGTH); }
+  
+  "write"      { return symbolFactory.newSymbol("WRITE", sym.WRITE); }
+  "read"       { return symbolFactory.newSymbol("READ", sym.READ); }
+  
+  
+  {QCHAR}      { return symbolFactory.newSymbol("QCHAR", QCHAR, yytext().charAt(1)); }
   {Number}     { return symbolFactory.newSymbol("NUMBER", NUMBER, Integer.parseInt(yytext())); }
 }
 
