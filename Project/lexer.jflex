@@ -65,9 +65,9 @@ TraditionalComment = "/*" {CommentContent} \*+ "/"
 EndOfLineComment = "//" [^\r\n]* {Newline}
 CommentContent = ( [^*] | \*+[^*/] )*
 Quotes = \'
-QCHAR = {Quotes}[A-Za-z][a-zA-Z0-9_ ]*{Quotes}
+QCHAR = {Quotes}.{Quotes}
 
-ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
+ident = ([:jletter:]) ([:jletterdigit:] | [:jletter:] | "_" )*
 
 
 %eofval{
@@ -106,8 +106,8 @@ ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
   ">"          { return symbolFactory.newSymbol("GREATER", GREATER); }
   "<"          { return symbolFactory.newSymbol("LESS", LESS); }
   
-  //"int"        { return symbolFactory.newSymbol("INT", sym.INT); }
-  //"char"       { return symbolFactory.newSymbol("CHAR", sym.CHAR); }
+  "int"        { return symbolFactory.newSymbol("INT", sym.INT); }
+  "char"       { return symbolFactory.newSymbol("CHAR", sym.CHAR); }
   
   "if"         { return symbolFactory.newSymbol("IF", sym.IF); }
   "else"       { return symbolFactory.newSymbol("ELSE", sym.ELSE); }
@@ -121,6 +121,7 @@ ident = ([:jletter:] | "_" ) ([:jletterdigit:] | [:jletter:] | "_" )*
   
   {QCHAR}      { return symbolFactory.newSymbol("QCHAR", QCHAR, yytext().charAt(1)); }
   {Number}     { return symbolFactory.newSymbol("NUMBER", NUMBER, Integer.parseInt(yytext())); }
+  {ident}      { return symbolFactory.newSymbol("NAME", NAME, yytext()); }
 }
 
 

@@ -36,6 +36,9 @@ terminal SEMI, PLUS, MINUS, UMINUS, TIMES, DIVIDE, QCHAR;
 terminal LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK;
 terminal IF, ELSE, WHILE, RETURN, WRITE, READ, LENGTH;
 terminal GREATER, LESS, ASSIGN, EQUALEQUAL, NEQUAL, NOT;  // Add new terminals here
+terminal INT;
+terminal CHAR;
+terminal String NAME;
 
 terminal Integer    NUMBER;        // our scanner provides numbers as integers
 
