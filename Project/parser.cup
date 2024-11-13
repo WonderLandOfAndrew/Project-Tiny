@@ -35,7 +35,7 @@ scan with {: return lexer.next_token(); :};
 terminal SEMI, PLUS, MINUS, UMINUS, TIMES, DIVIDE, QCHAR;
 terminal LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK;
 terminal IF, ELSE, WHILE, RETURN, WRITE, READ, LENGTH;
-terminal GREATER, LESS, ASSIGN, EQUALEQUAL, NEQUAL, NOT;  // Add new terminals here
+terminal GREATER, LESS, ASSIGN, EQUALEQUAL, NEQUAL, NOT, EQUAL, COMMA;  // Add new terminals here
 terminal INT;
 terminal CHAR;
 terminal String NAME;
@@ -43,8 +43,23 @@ terminal String NAME;
 terminal Integer    NUMBER;        // our scanner provides numbers as integers
 
 /* Non terminals */
-non terminal            expr_list;
-non terminal Integer    expr;      // used to store evaluated subexpressions
+non terminal program;
+non terminal declaration;
+non terminal fun_declaration;
+non terminal formal_pars;
+non terminal formal_par;
+non terminal block;
+non terminal var_declaration;
+non terminal type;
+non terminal statements;
+non terminal statement;
+non terminal lexp;
+non terminal exp;
+non terminal binop;
+non terminal unop;
+non terminal pars;
+non terminal var;
+non terminal epsilon;
 
 /* Precedences */
 precedence left PLUS, MINUS;
@@ -54,17 +69,76 @@ precedence left EQUALEQUAL, NEQUAL;
 precedence left UMINUS;
 
 /* The grammar rules */
-expr_list ::= expr_list expr:e SEMI         {: System.out.println(e); :}
-            | expr:e SEMI                   {: System.out.println(e); :}
+
+program ::= program declaration 
+			| declaration
+			;
+
+declaration ::= fun_declaration 
+			| var_declaration
+			;
+
+fun_declaration ::= type NAME LPAR formal_pars RPAR block;
+
+formal_pars ::= formal_pars COMMA formal_par 
+              | formal_par
+              ;
+
+formal_par ::= type NAME;
+
+block ::= LBRACE var_declaration statements RBRACE;
+
+var_declaration ::= type NAME SEMI;
+
+type			::= INT
+				|	CHAR
+				|	type LBRACK exp RBRACK
+				; // array type
+
+statements ::= statements SEMI statement
+			| statement	
+			;
+			
+statement  ::= IF LPAR exp RPAR statement
+            | IF LPAR exp RPAR statement ELSE statement
+            | WHILE LPAR exp RPAR statement
+			| lexp ASSIGN exp
+            | RETURN exp
+			| NAME LPAR pars RPAR
+            | block
+            | WRITE exp
+            | READ lexp
             ;
-            
-expr      ::= expr:e1 PLUS  expr:e2         {: RESULT = e1+e2;        :}
-             | expr:e1 MINUS expr:e2        {: RESULT = e1-e2;        :}
-             | expr:e1 TIMES expr:e2        {: RESULT = e1*e2;        :}
-             | expr:e1 DIVIDE expr:e2       {: RESULT = e1/e2;        :}
-             | MINUS expr:e                 {: RESULT = -e;           :}
-             %prec UMINUS
-             | LPAR expr:e RPAR         	{: RESULT = e;            :}
-             | NUMBER:n                     {: RESULT = n;            :}
-             ;
+
+lexp		::= var
+			|	lexp LBRACK exp RBRACK;	// array access
+
+exp			::=	lexp
+			|	exp binop exp
+			|	unop exp
+			|	LPAR exp RPAR
+			|	NUMBER
+			|	NAME LPAR pars RPAR // function call
+			|	QCHAR
+			|	LENGTH lexp; // size of array
+			
+binop		::= MINUS
+			|	PLUS
+			|	TIMES
+			|	DIVIDE
+			|	EQUAL
+			|	NEQUAL
+			|	GREATER
+			|	LESS;
+			
+unop		::= MINUS
+			|	NOT;
+
+pars		::= pars COMMA exp 
+			|	exp
+			|   
+			;		
+
+var			::= NAME;
+
        

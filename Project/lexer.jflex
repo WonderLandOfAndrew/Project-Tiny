@@ -62,7 +62,7 @@ Number     = [0-9]+
 /* comments */
 Comment = {TraditionalComment} | {EndOfLineComment}
 TraditionalComment = "/*" {CommentContent} \*+ "/"
-EndOfLineComment = "//" [^\r\n]* {Newline}
+EndOfLineComment = "//"[^\r\n]*{Newline}
 CommentContent = ( [^*] | \*+[^*/] )*
 Quotes = \'
 QCHAR = {Quotes}.{Quotes}
@@ -81,7 +81,9 @@ ident = ([:jletter:]) ([:jletterdigit:] | [:jletter:] | "_" )*
 <YYINITIAL> {
 
   {Whitespace} {                              }
+  {EndOfLineComment} {}
   ";"          { return symbolFactory.newSymbol("SEMI", SEMI); }
+  ","          { return symbolFactory.newSymbol("COMMA", COMMA); }
   
   "+"          { return symbolFactory.newSymbol("PLUS", PLUS); }
   "-"          { return symbolFactory.newSymbol("MINUS", MINUS); }
