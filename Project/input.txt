@@ -1,11 +1,18 @@
-int sumArray(int[10] arr) {
-    int i;
-    int sum;
-    sum = 0;
-    i = 0;
-    while (i < 10) {
-        sum = sum + arr[i];
-        i = i + 1;
-    }
-    return sum;
+
+int sum_max(int a, int b){
+
+	int max; 
+	
+	max = 0;	
+	
+	if (a > b) {
+		max = a
+		}
+	else {
+		max = b
+	} ;
+	
+	sum = sum + max;
+	return sum
+	
 }

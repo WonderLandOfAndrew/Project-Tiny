@@ -32,10 +32,10 @@ scan with {: return lexer.next_token(); :};
 
 /* Terminals (tokens returned by the scanner). */
 
-terminal SEMI, PLUS, MINUS, UMINUS, TIMES, DIVIDE, QCHAR;
+terminal SEMI, PLUS, MINUS, TIMES, DIVIDE, QCHAR;
 terminal LPAR, RPAR, LBRACE, RBRACE, LBRACK, RBRACK;
 terminal IF, ELSE, WHILE, RETURN, WRITE, READ, LENGTH;
-terminal GREATER, LESS, ASSIGN, EQUALEQUAL, NEQUAL, NOT, EQUAL, COMMA;  // Add new terminals here
+terminal GREATER, LESS, ASSIGN, NEQUAL, NOT, EQUAL, COMMA;  // Add new terminals here
 terminal INT;
 terminal CHAR;
 terminal String NAME;
@@ -59,86 +59,98 @@ non terminal binop;
 non terminal unop;
 non terminal pars;
 non terminal var;
-non terminal epsilon;
+non terminal var_declarations;
+
 
 /* Precedences */
 precedence left PLUS, MINUS;
 precedence left TIMES, DIVIDE;
 precedence left GREATER, LESS;
-precedence left EQUALEQUAL, NEQUAL;
-precedence left UMINUS;
+precedence left EQUAL, NEQUAL;
+
 
 /* The grammar rules */
 
-program ::= program declaration 
-			| declaration
+program ::= program declaration {: System.out.println("program B1"); :}
+			| declaration		{: System.out.println("program B2"); :}
 			;
 
-declaration ::= fun_declaration 
-			| var_declaration
+declaration ::= fun_declaration {: System.out.println("declaration B1"); :}
+			| var_declaration   {: System.out.println("declaration B2"); :}
 			;
 
-fun_declaration ::= type NAME LPAR formal_pars RPAR block;
+fun_declaration ::= type NAME LPAR formal_pars RPAR block {: System.out.println("fun_declaration B1"); :}
+				;
 
-formal_pars ::= formal_pars COMMA formal_par 
-              | formal_par
+formal_pars ::= formal_pars COMMA formal_par {: System.out.println("formal_pars B1"); :}
+              | formal_par					 {: System.out.println("formal_pars B2"); :}
               ;
 
-formal_par ::= type NAME;
+formal_par ::= type NAME {: System.out.println("formal_par B1"); :}
+			;
 
-block ::= LBRACE var_declaration statements RBRACE;
+block ::= LBRACE var_declarations statements RBRACE {: System.out.println("block B1"); :}
+		;
+var_declarations ::= var_declarations var_declaration
+					|
+					;
+var_declaration ::= type NAME SEMI	{: System.out.println("var_declaration B1"); :}
+				;
 
-var_declaration ::= type NAME SEMI;
-
-type			::= INT
-				|	CHAR
-				|	type LBRACK exp RBRACK
+type			::= INT		{: System.out.println("type B1"); :}
+				|	CHAR	{: System.out.println("type B2"); :}
+				|	type LBRACK exp RBRACK  {: System.out.println("type B3"); :}
 				; // array type
 
-statements ::= statements SEMI statement
-			| statement	
+statements ::= statements SEMI statement {: System.out.println("statements B1"); :}
+			| statement					 {: System.out.println("statements B2"); :}
 			;
 			
-statement  ::= IF LPAR exp RPAR statement
-            | IF LPAR exp RPAR statement ELSE statement
-            | WHILE LPAR exp RPAR statement
-			| lexp ASSIGN exp
-            | RETURN exp
-			| NAME LPAR pars RPAR
-            | block
-            | WRITE exp
-            | READ lexp
+statement  ::= IF LPAR exp RPAR statement				{: System.out.println("statement B1"); :}
+            | IF LPAR exp RPAR statement ELSE statement {: System.out.println("statement B2"); :}
+            | WHILE LPAR exp RPAR statement				{: System.out.println("statement B3"); :}
+			| lexp ASSIGN exp							{: System.out.println("statement B4"); :}
+            | RETURN exp								{: System.out.println("statement B5"); :}
+			| NAME LPAR pars RPAR						{: System.out.println("statement B6"); :}
+            | block										{: System.out.println("statement B7"); :}
+            | WRITE exp									{: System.out.println("statement B8"); :}
+            | READ lexp									{: System.out.println("statement B9"); :}
             ;
 
-lexp		::= var
-			|	lexp LBRACK exp RBRACK;	// array access
+lexp		::= var  {: System.out.println("lexp B1"); :}
+			|	lexp LBRACK exp RBRACK {: System.out.println("lexp B2"); :}
+			; 	
 
-exp			::=	lexp
-			|	exp binop exp
-			|	unop exp
-			|	LPAR exp RPAR
-			|	NUMBER
-			|	NAME LPAR pars RPAR // function call
-			|	QCHAR
-			|	LENGTH lexp; // size of array
+exp			::=	lexp {: System.out.println("exp B1"); :}
+			|	exp binop exp {: System.out.println("exp B2"); :}
+			|	unop exp {: System.out.println("exp B3"); :}
+			|	LPAR exp RPAR {: System.out.println("exp B4"); :}
+			|	NUMBER {: System.out.println("exp B5"); :}
+			|	NAME LPAR pars RPAR {: System.out.println("exp B6"); :}
+			|	QCHAR {: System.out.println("exp B7"); :}
+			|	LENGTH lexp {: System.out.println("exp B8"); :}
+			;
 			
-binop		::= MINUS
-			|	PLUS
-			|	TIMES
-			|	DIVIDE
-			|	EQUAL
-			|	NEQUAL
-			|	GREATER
-			|	LESS;
+binop		::= MINUS {: System.out.println("binop B1"); :}
+			|	PLUS  {: System.out.println("binop B2"); :}
+			|	TIMES {: System.out.println("binop B3"); :}
+			|	DIVIDE {: System.out.println("binop B4"); :}
+			|	EQUAL  {: System.out.println("binop B5"); :}
+			|	NEQUAL {: System.out.println("binop B6"); :}
+			|	GREATER {: System.out.println("binop B7"); :}
+			|	LESS {: System.out.println("binop B8"); :}
+			;
 			
-unop		::= MINUS
-			|	NOT;
+unop		::= MINUS {: System.out.println("unop B1"); :}
+			|	NOT  {: System.out.println("unop B2"); :}
+			;
 
-pars		::= pars COMMA exp 
-			|	exp
-			|   
+pars		::= pars COMMA exp {: System.out.println("pars B1"); :}
+			|	exp			   {: System.out.println("pars B2"); :}
+			|   			   {: System.out.println("pars B3"); :}
 			;		
 
-var			::= NAME;
+var			::= NAME {: System.out.println("var B1"); :}
+			;
 
        
