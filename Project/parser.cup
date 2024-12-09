@@ -5,6 +5,7 @@
 
 package cup.example;
 
+import classes.TreeNode;
 import java_cup.runtime.*;
 import cup.example.Lexer;
 import java.io.IOException;
@@ -13,6 +14,12 @@ import java.io.FileInputStream;
 
 parser code {:
   protected Lexer lexer;
+  protected TreeNode parseTreeRoot = null;
+
+  public TreeNode getParseTree()
+  {
+	return parseTreeRoot;
+  }
 :}
 
 /* define how to connect to the scanner! */
@@ -43,23 +50,23 @@ terminal String NAME;
 terminal Integer    NUMBER;        // our scanner provides numbers as integers
 
 /* Non terminals */
-non terminal program;
-non terminal declaration;
-non terminal fun_declaration;
-non terminal formal_pars;
-non terminal formal_par;
-non terminal block;
-non terminal var_declaration;
-non terminal type;
-non terminal statements;
-non terminal statement;
-non terminal lexp;
-non terminal exp;
-non terminal binop;
-non terminal unop;
-non terminal pars;
-non terminal var;
-non terminal var_declarations;
+non terminal TreeNode program;
+non terminal TreeNode declaration;
+non terminal TreeNode fun_declaration;
+non terminal TreeNode formal_pars;
+non terminal TreeNode formal_par;
+non terminal TreeNode block;
+non terminal TreeNode var_declaration;
+non terminal TreeNode type;
+non terminal TreeNode statements;
+non terminal TreeNode statement;
+non terminal TreeNode lexp;
+non terminal TreeNode exp;
+non terminal TreeNode binop;
+non terminal TreeNode unop;
+non terminal TreeNode pars;
+non terminal TreeNode var;
+non terminal TreeNode var_declarations;
 
 
 /* Precedences */
@@ -71,86 +78,215 @@ precedence left EQUAL, NEQUAL;
 
 /* The grammar rules */
 
-program ::= program declaration {: System.out.println("program B1"); :}
-			| declaration		{: System.out.println("program B2"); :}
+program ::= program:prog declaration:decl {: prog.addChild(decl); RESULT = prog; :}
+			| declaration:decl	{: 
+									parseTreeRoot = new TreeNode("Program");
+									parseTreeRoot.addChild(decl);
+									RESULT = parseTreeRoot;
+								 :}
 			;
 
-declaration ::= fun_declaration {: System.out.println("declaration B1"); :}
-			| var_declaration   {: System.out.println("declaration B2"); :}
+declaration ::= fun_declaration:fd {: TreeNode result = new TreeNode("Declaration");
+									  result.addChild(fd);		
+									  RESULT = result;
+									:}
+			| var_declaration:vd   {:
+												 
+									  TreeNode result = new TreeNode("Declaration");
+									  result.addChild(vd);		
+									  RESULT = result;
+									:}
 			;
 
-fun_declaration ::= type NAME LPAR formal_pars RPAR block {: System.out.println("fun_declaration B1"); :}
+fun_declaration ::= type:t NAME:n LPAR formal_pars:fp RPAR block:b {: 
+										TreeNode result = new TreeNode("Function" + n);
+										result.addChild(t);
+										result.addChild(fp);
+										result.addChild(b);
+										RESULT = result;	
+									 :}
 				;
 
-formal_pars ::= formal_pars COMMA formal_par {: System.out.println("formal_pars B1"); :}
-              | formal_par					 {: System.out.println("formal_pars B2"); :}
+formal_pars ::= formal_pars:fps COMMA formal_par:fp {: 
+													   fps.addChild(fp);
+													   RESULT = fps;			
+													:}
+              | formal_par:fp			     {: 
+												TreeNode params = new TreeNode("ParamsList");
+			 								   	params.addChild(fp); 
+												RESULT = params; 
+											 :}
               ;
 
-formal_par ::= type NAME {: System.out.println("formal_par B1"); :}
+formal_par ::= type:t NAME:n {: TreeNode result = new TreeNode("ParamsList" + n); 
+								result.addChild(t);
+								RESULT = result;
+							 :}
 			;
 
-block ::= LBRACE var_declarations statements RBRACE {: System.out.println("block B1"); :}
+block ::= LBRACE var_declarations:vds statements:stmt RBRACE {: 
+																TreeNode result = new TreeNode("Block");
+																result.addChild(vds);
+																result.addChild(stmt);
+																RESULT = result;
+													        :}
 		;
-var_declarations ::= var_declarations var_declaration
-					|
+var_declarations ::= var_declarations:vds var_declaration:vd {:
+																	  vds.addChild(vd);
+																	  RESULT = vds;
+																   :}
+					|											{: TreeNode result = new TreeNode("Var Declarations");
+																   RESULT = result;
+																:}
 					;
-var_declaration ::= type NAME SEMI	{: System.out.println("var_declaration B1"); :}
+var_declaration ::= type:t NAME:n SEMI	{:
+										  TreeNode result = new TreeNode("Declaration" + n);
+										  result.addChild(t);
+										  RESULT = result; 
+									    :}
 				;
 
-type			::= INT		{: System.out.println("type B1"); :}
-				|	CHAR	{: System.out.println("type B2"); :}
-				|	type LBRACK exp RBRACK  {: System.out.println("type B3"); :}
+type			::= INT		{: RESULT = new TreeNode("TYPE");
+							   RESULT.addChild(new TreeNode("INT"));
+							 :}
+				|	CHAR	{: RESULT = new TreeNode("TYPE");
+							   RESULT.addChild(new TreeNode("CHAR")); :}
+				|	type:t LBRACK exp:e RBRACK  {:  
+										           TreeNode result = new TreeNode("Type");
+										           result.addChild(t);
+												   result.addChild(e);				
+										           RESULT = result; 
+												:}
 				; // array type
 
-statements ::= statements SEMI statement {: System.out.println("statements B1"); :}
-			| statement					 {: System.out.println("statements B2"); :}
+statements ::= statements:stmts SEMI statement:stmt {:
+                                                      stmts.addChild(stmt);
+													  RESULT = stmts; 
+                                                    :}
+			| statement:stmt					 {:
+											TreeNode result = new TreeNode("StatementsList");
+			 								result.addChild(stmt); 
+										    RESULT = result; 
+									     :}
 			;
 			
-statement  ::= IF LPAR exp RPAR statement				{: System.out.println("statement B1"); :}
-            | IF LPAR exp RPAR statement ELSE statement {: System.out.println("statement B2"); :}
-            | WHILE LPAR exp RPAR statement				{: System.out.println("statement B3"); :}
-			| lexp ASSIGN exp							{: System.out.println("statement B4"); :}
-            | RETURN exp								{: System.out.println("statement B5"); :}
-			| NAME LPAR pars RPAR						{: System.out.println("statement B6"); :}
-            | block										{: System.out.println("statement B7"); :}
-            | WRITE exp									{: System.out.println("statement B8"); :}
-            | READ lexp									{: System.out.println("statement B9"); :}
+statement  ::= IF LPAR exp:e RPAR statement:s			{: TreeNode result = new TreeNode("statement");
+															result.addChild(e);
+															result.addChild(s);	
+															RESULT = result; 
+														:}
+            | IF LPAR exp:e RPAR statement:s ELSE statement:s1 {: TreeNode result = new TreeNode("IF ELSE");
+                                                                  result.addChild(e);
+																  result.addChild(s);
+																  result.addChild(s1);
+																  RESULT = result;
+															   :}
+            | WHILE LPAR exp:e RPAR statement:s				{: 
+																TreeNode result = new TreeNode("WHILE");
+																result.addChild(e);
+																result.addChild(s);
+																RESULT = result; 
+															:}
+			| lexp:le ASSIGN exp:e							{: TreeNode result = new TreeNode("ASSIGN");
+															   result.addChild(le);
+															   result.addChild(e);
+															   RESULT = result; 
+                                                            :}
+            | RETURN exp:e								{: TreeNode result = new TreeNode("ASSIGN");
+														   result.addChild(e);
+                                                           RESULT = result; 
+														:}
+			| NAME LPAR pars:p RPAR						{: TreeNode result = new TreeNode("name pars");
+														   result.addChild(p);
+                                                           RESULT = result; 
+														:}
+            | block:b										{: TreeNode result = new TreeNode("block");
+														       result.addChild(b);
+                                                               RESULT = result; 
+															:}
+            | WRITE exp:e									{:
+																TreeNode result = new TreeNode("WRITE");
+														        result.addChild(e);
+                                                                RESULT = result; 
+														    :}
+            | READ lexp:le									{: TreeNode result = new TreeNode("READ");
+														       result.addChild(le);
+                                                               RESULT = result; :}
             ;
 
-lexp		::= var  {: System.out.println("lexp B1"); :}
-			|	lexp LBRACK exp RBRACK {: System.out.println("lexp B2"); :}
+lexp		::= var:v  {:
+						  TreeNode result = new TreeNode("Logic expression list");
+			 			  result.addChild(v); 
+					      RESULT = result; 
+					   :}
+			|	lexp:lp LBRACK exp:e RBRACK {:
+                                               lp.addChild(e);
+											   RESULT = e; 
+                                            :}
 			; 	
 
-exp			::=	lexp {: System.out.println("exp B1"); :}
-			|	exp binop exp {: System.out.println("exp B2"); :}
-			|	unop exp {: System.out.println("exp B3"); :}
-			|	LPAR exp RPAR {: System.out.println("exp B4"); :}
-			|	NUMBER {: System.out.println("exp B5"); :}
-			|	NAME LPAR pars RPAR {: System.out.println("exp B6"); :}
-			|	QCHAR {: System.out.println("exp B7"); :}
-			|	LENGTH lexp {: System.out.println("exp B8"); :}
+exp			::=	lexp:le {: TreeNode result = new TreeNode("Expression");
+						   result.addChild(le);
+						   RESULT = result;  :}
+			|	exp:expr binop:b exp:e {:expr.addChild(b); 
+										 expr.addChild(e);
+									     RESULT = expr; 
+                                       :}
+										
+			|	unop:u exp:e {: TreeNode result = new TreeNode("UnvOperat");
+								result.addChild(u);
+								result.addChild(e);
+                                RESULT = result;								
+							 :}
+			|	LPAR exp:e RPAR {: TreeNode result = new TreeNode("Expression2");
+						   		result.addChild(e);
+						   		RESULT = result;   :}
+			|	NUMBER {: RESULT = new TreeNode("Number"); :}
+			|	NAME:n LPAR pars:p RPAR {: TreeNode result = new TreeNode("Exp");
+										   result.addChild( new TreeNode(n));
+										   result.addChild(p);
+										   RESULT = result;			 
+										:}
+			|	QCHAR:q {: RESULT = new TreeNode("" + q); :}
+			|	LENGTH lexp:l1 {: TreeNode result= new TreeNode ("Lexpression");
+							      result.addChild(l1);
+							      RESULT = result;
+							:}
 			;
 			
-binop		::= MINUS {: System.out.println("binop B1"); :}
-			|	PLUS  {: System.out.println("binop B2"); :}
-			|	TIMES {: System.out.println("binop B3"); :}
-			|	DIVIDE {: System.out.println("binop B4"); :}
-			|	EQUAL  {: System.out.println("binop B5"); :}
-			|	NEQUAL {: System.out.println("binop B6"); :}
-			|	GREATER {: System.out.println("binop B7"); :}
-			|	LESS {: System.out.println("binop B8"); :}
+binop		::= MINUS {: RESULT = new TreeNode("Minus"); :}
+			|	PLUS  {: RESULT = new TreeNode("Plus"); :}
+			|	TIMES {: RESULT = new TreeNode("Times"); :}
+			|	DIVIDE {: RESULT = new TreeNode("Divide"); :}
+			|	EQUAL  {: RESULT = new TreeNode("Equal"); :}
+			|	NEQUAL {: RESULT = new TreeNode("Not Equal"); :}
+			|	GREATER {: RESULT = new TreeNode("Greater"); :}
+			|	LESS {: RESULT = new TreeNode("Less"); :}
 			;
 			
-unop		::= MINUS {: System.out.println("unop B1"); :}
-			|	NOT  {: System.out.println("unop B2"); :}
+unop		::= MINUS {: RESULT = new TreeNode("Minus"); :}
+			|	NOT  {: RESULT = new TreeNode("Not"); :}
 			;
 
-pars		::= pars COMMA exp {: System.out.println("pars B1"); :}
-			|	exp			   {: System.out.println("pars B2"); :}
-			|   			   {: System.out.println("pars B3"); :}
+pars		::= pars:p COMMA exp:e {:
+								  		p.addChild(e);
+								  		RESULT = p;
+							       :}
+			|	exp:e			   {: 
+								  		TreeNode result = new TreeNode("Expression");
+			 					  		result.addChild(e); 
+					     		  		RESULT = result;
+							       :}
+			|   			   {:						
+									 
+								:}
 			;		
 
-var			::= NAME {: System.out.println("var B1"); :}
+var			::= NAME:n {:
+						TreeNode result = new TreeNode("Variable");
+						result.addChild(new TreeNode(n));
+						RESULT = result;  
+				     :}
 			;
 
        
