@@ -1,6 +1,9 @@
-int sum_max(int a, int b){
+int a;
 
+int sum_max(int a, int b){
+	
 	int max; 
+	int sum;
 	
 	max = 0;	
 	

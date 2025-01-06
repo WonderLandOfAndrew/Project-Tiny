@@ -5,7 +5,9 @@
 
 package cup.example;
 
-import classes.TreeNode;
+import classes.*;
+import symbols.*;
+
 import java_cup.runtime.*;
 import cup.example.Lexer;
 import java.io.IOException;
@@ -13,13 +15,13 @@ import java.io.File;
 import java.io.FileInputStream;
 
 parser code {:
-  protected Lexer lexer;
-  protected TreeNode parseTreeRoot = null;
-
-  public TreeNode getParseTree()
-  {
-	return parseTreeRoot;
-  }
+	protected Lexer lexer;
+ 	protected TreeNode syntaxTree = null; 
+	
+ 	public TreeNode getSyntaxTree()
+  	{
+		return syntaxTree;
+  	}
 :}
 
 /* define how to connect to the scanner! */
@@ -45,9 +47,9 @@ terminal IF, ELSE, WHILE, RETURN, WRITE, READ, LENGTH;
 terminal GREATER, LESS, ASSIGN, NEQUAL, NOT, EQUAL, COMMA;  // Add new terminals here
 terminal INT;
 terminal CHAR;
-terminal String NAME;
 
-terminal Integer    NUMBER;        // our scanner provides numbers as integers
+terminal String NAME;
+terminal Integer NUMBER;        // our scanner provides numbers as integers
 
 /* Non terminals */
 non terminal TreeNode program;
@@ -78,28 +80,31 @@ precedence left EQUAL, NEQUAL;
 
 /* The grammar rules */
 
-program ::= program:prog declaration:decl {: prog.addChild(decl); RESULT = prog; :}
+program ::= program:prog declaration:decl {: 
+											prog.addChild(decl); 
+											RESULT = prog; 
+										:}
 			| declaration:decl	{: 
-									parseTreeRoot = new TreeNode("Program");
-									parseTreeRoot.addChild(decl);
-									RESULT = parseTreeRoot;
+									syntaxTree = new TreeNode("Program");
+                                    syntaxTree.addChild(decl);
+                                    RESULT = syntaxTree;
 								 :}
 			;
 
-declaration ::= fun_declaration:fd {: TreeNode result = new TreeNode("Declaration");
+declaration ::= fun_declaration:fd {:  
+									  TreeNode result = new TreeNode("FunDeclaration");
 									  result.addChild(fd);		
 									  RESULT = result;
 									:}
-			| var_declaration:vd   {:
-												 
-									  TreeNode result = new TreeNode("Declaration");
+			| var_declaration:vd   {: 
+									  TreeNode result = new TreeNode("VarDeclaration");
 									  result.addChild(vd);		
 									  RESULT = result;
 									:}
 			;
 
-fun_declaration ::= type:t NAME:n LPAR formal_pars:fp RPAR block:b {: 
-										TreeNode result = new TreeNode("Function" + n);
+fun_declaration ::= type:t NAME:n LPAR formal_pars:fp RPAR block:b {:
+										TreeNode result = new TreeNode("Function",  n);
 										result.addChild(t);
 										result.addChild(fp);
 										result.addChild(b);
@@ -118,7 +123,8 @@ formal_pars ::= formal_pars:fps COMMA formal_par:fp {:
 											 :}
               ;
 
-formal_par ::= type:t NAME:n {: TreeNode result = new TreeNode("ParamsList" + n); 
+formal_par ::= type:t NAME:n {: 
+								TreeNode result = new TreeNode("Param", n); 
 								result.addChild(t);
 								RESULT = result;
 							 :}
@@ -129,18 +135,19 @@ block ::= LBRACE var_declarations:vds statements:stmt RBRACE {:
 																result.addChild(vds);
 																result.addChild(stmt);
 																RESULT = result;
-													        :}
+													          :}
 		;
 var_declarations ::= var_declarations:vds var_declaration:vd {:
 																	  vds.addChild(vd);
 																	  RESULT = vds;
 																   :}
-					|											{: TreeNode result = new TreeNode("Var Declarations");
+					|											{: TreeNode result = new TreeNode("VarDeclaration");
 																   RESULT = result;
 																:}
 					;
 var_declaration ::= type:t NAME:n SEMI	{:
-										  TreeNode result = new TreeNode("Declaration" + n);
+										  TreeNode result = new TreeNode("Variable");
+										  result.addChild(new TreeNode(n));
 										  result.addChild(t);
 										  RESULT = result; 
 									    :}

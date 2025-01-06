@@ -1,5 +1,4 @@
 package classes;
-
 public class TreeNodePrinter {
     private TreeNode node = null;
     
@@ -17,9 +16,9 @@ public class TreeNodePrinter {
         }
         
         for (int i = 0; i < level; i++) {
-            System.out.print(" ");
+            System.out.print("  ");
         }
-        System.out.println(currentNode.getNodeInfo());
+        System.out.println(currentNode.getData());
         
         TreeNode[] children = currentNode.getChildren();
         for (int i = 0; i < children.length; i++) {
