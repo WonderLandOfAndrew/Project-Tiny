@@ -38,17 +38,20 @@ public class SymbolsTable {
 		if (node.getData().equals("FunDeclaration") )
 		{
 			SymbolDetails details = new SymbolDetails();
-			details.contextName = currentContext;			
-			details.symbolName = node.getExtraData();
-			if (node.getChildren().length > 0)
+			details.contextName = currentContext;
+			TreeNode node1 = node.getChildren()[0];
+			details.symbolName = node1.getExtraData();
+			if (node1.getChildren().length > 0)
 			{
-				details.dataType = node.getChildren()[0].getExtraData();
+				TreeNode node2 = node1.getChildren()[0];
+				details.dataType = node2.getChildren()[0].getData();
 			}			
 			details.symbolScope = scope;
 			details.symbolType = SymbolType.Function;
 			context = details.symbolName;
 			localScope = IdentifierScope.Local;
 			table.put(details.symbolName, details);
+			
 		}
 		for (int i = 0; i < node.getChildren().length; i++)
 		{
