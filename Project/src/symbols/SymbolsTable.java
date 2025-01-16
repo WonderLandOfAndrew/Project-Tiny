@@ -17,22 +17,24 @@ public class SymbolsTable {
 	{
 		String context = currentContext;
 		IdentifierScope localScope = scope;
-		if (node.getData().equals("VarDeclaration") && node.getChildren().length == 1)
+		if (node.getData().equals("VarDeclaration") && node.getChildren().length > 0)
 		{
-			var variableNode = node.getChildren()[0];
-			var variableInfoNodes = variableNode.getChildren();
-			if (variableInfoNodes.length == 2)
-			{
-				var dataTypeNode = variableInfoNodes[1].getChildren()[0];
-				var variableNameNode = variableInfoNodes[0];
-				
-				SymbolDetails details = new SymbolDetails();
-				details.contextName = currentContext;			
-				details.symbolName = variableNameNode.getData();
-				details.dataType = dataTypeNode.getData();
-				details.symbolScope = scope;
-				details.symbolType = SymbolType.Variable;
-				table.put(details.symbolName, details);
+			for (int i = 0; i < node.getChildren().length; i++) {
+				var variableNode = node.getChildren()[i];
+				var variableInfoNodes = variableNode.getChildren();
+				if (variableInfoNodes.length == 2)
+				{
+					var dataTypeNode = variableInfoNodes[1].getChildren()[0];
+					var variableNameNode = variableInfoNodes[0];
+					
+					SymbolDetails details = new SymbolDetails();
+					details.contextName = currentContext;			
+					details.symbolName = variableNameNode.getData();
+					details.dataType = dataTypeNode.getData();
+					details.symbolScope = scope;
+					details.symbolType = SymbolType.Variable;
+					table.put(details.symbolName, details);
+				}
 			}
 		}
 		if (node.getData().equals("FunDeclaration") )

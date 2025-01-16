@@ -1,8 +1,8 @@
 int a;
+int b;
 
 int sum_max(int a, int b){
-	
-	int max; 
+	int max;
 	int sum;
 	
 	max = 0;	
@@ -12,7 +12,24 @@ int sum_max(int a, int b){
 		}
 	else {
 		max = b
-	} ;
+	};
+	
+	sum = sum + max;
+	return sum
+}
+
+int sum_max2(int a, int b){
+	int max;
+	int sum;
+	
+	max = 0;	
+	
+	if (a > b) {
+		max = a
+		}
+	else {
+		max = b
+	};
 	
 	sum = sum + max;
 	return sum
